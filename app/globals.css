@@ -49,3 +49,13 @@ body {
 .label-style {
   @apply block text-base/6 font-medium text-white;
 }
+
+/* Скрыть скроллбар полностью */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE и Edge */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
