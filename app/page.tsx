@@ -1,12 +1,24 @@
+'use client'
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 export default async function Home() {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/users`, {
-    cache: 'no-store' // Отключаем кэширование для свежих данных
-  });
+  const [userCount, setUserCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const users = await response.json()
-  const userCount = users.length;
+  useEffect(() => {
+    fetch('/api/users')
+      .then((res) => res.json())
+      .then((users) => {
+        setUserCount(users.length);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Ошибка загрузки пользователей:', error);
+        setUserCount(0);
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-900">
