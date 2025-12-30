@@ -1,0 +1,34 @@
+'use client';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import Image from 'next/image';
+
+const TopBar = () => {
+  const currentPath = usePathname();
+
+  const navigation = [
+    { name: 'Панель управления', href: '/' },
+    { name: 'Пользователи', href: '/users' },
+    { name: 'Аналитика', href: '/analytics' },
+    { name: 'Настройки', href: '/settings' },
+  ];
+
+  const isActive = (href: string) => currentPath === href;
+
+  return (
+    <nav className='h-16 bg-gray-700 border-b border-gray-200 flex items-center px-4'>
+        <Link href='/'><Image src='/logo.png' alt='Admin Dashboard Logo' width={32} height={32} className='mr-16'/></Link>
+      {navigation.map((item) => (
+        <Link
+          className={`px-3 py-2 rounded-2xl text-gray-200 hover:bg-gray-600 mr-4 ${isActive(item.href) ? 'bg-blue-900 text-blue-900' : ''}`}
+          href={item.href}
+          key={item.href}
+        >
+          {item.name}
+        </Link>
+      ))}
+    </nav>
+  );
+};
+
+export default TopBar;
