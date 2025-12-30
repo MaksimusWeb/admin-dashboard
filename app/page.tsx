@@ -1,8 +1,8 @@
-'use client'
+'use client';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
-export default async function Home() {
+export default function Home() {
   const [userCount, setUserCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
