@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import { useSession, signOut } from 'next-auth/react'
 
 const TopBar = () => {
   const currentPath = usePathname();
@@ -27,8 +28,40 @@ const TopBar = () => {
           {item.name}
         </Link>
       ))}
+      {/* Блок авторизации */}
+    <div className="ml-auto flex items-center space-x-4">
+      <SessionStatus />
+    </div>
     </nav>
   );
 };
+
+function SessionStatus() {
+  const { data: session, status } = useSession()
+
+  if (status === 'loading') {
+    return <span className="text-gray-200">Загрузка...</span>
+  }
+
+  if (session) {
+    return (
+      <>
+        <span className="text-gray-200">Привет, {session.user?.name || session.user?.email}</span>
+        <button 
+          onClick={() => signOut()}
+          className="bg-red-600 px-3 py-1 rounded hover:bg-red-700 text-white ml-4"
+        >
+          Выйти
+        </button>
+      </>
+    )
+  }
+
+  return (
+    <Link href="/auth/signin" className="bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 text-white">
+      Войти
+    </Link>
+  )
+}
 
 export default TopBar;
