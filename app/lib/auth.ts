@@ -33,35 +33,47 @@ export const authOptions: NextAuthOptions = {
           password: { label: 'Password', type: 'password' }
         },
         async authorize(credentials) {
+          console.log('Auth attempt:', { email: credentials?.email })
+
           if (!credentials?.email || !credentials?.password) {
+            console.log('Missing credentials')
             return null
           }
-        
-          // Для демо - простая проверка пароля, создаем пользователя если нет
+
+          // Для демо - простая проверка пароля
           if (credentials.password !== 'admin123') {
+            console.log('Wrong password')
             return null
           }
-        
-          // Ищем или создаем пользователя
-          let user = await prisma.user.findUnique({
-            where: { email: credentials.email }
-          })
-        
-          if (!user) {
-            user = await prisma.user.create({
-              data: {
-                email: credentials.email,
-                name: credentials.email.split('@')[0], // Имя из email
-                role: 'admin'
-              }
+
+          try {
+            // Ищем или создаем пользователя
+            let user = await prisma.user.findUnique({
+              where: { email: credentials.email }
             })
-          }
-        
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
+
+            if (!user) {
+              console.log('Creating new user:', credentials.email)
+              user = await prisma.user.create({
+                data: {
+                  email: credentials.email,
+                  name: credentials.email.split('@')[0],
+                  role: 'admin'
+                }
+              })
+            } else {
+              console.log('Found existing user:', user.email)
+            }
+
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+            }
+          } catch (error) {
+            console.error('Database error in auth:', error)
+            return null
           }
         }
       })
