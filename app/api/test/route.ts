@@ -14,7 +14,7 @@ export async function GET() {
     console.error('Database error:', error)
     return NextResponse.json({
       status: 'error',
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       database: 'disconnected'
     }, { status: 500 })
   }
