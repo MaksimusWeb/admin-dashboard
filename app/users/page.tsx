@@ -2,6 +2,8 @@
 
 import { error } from 'console';
 import { FormEvent, ReactEventHandler, useEffect, useState } from 'react';
+import { getSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export interface User {
   id: number;
@@ -25,6 +27,7 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState<'all' | 'user' | 'admin'>('all');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   // const [notification, setNotification] = useState<{
   //   type: 'success' | 'error' | null;
@@ -43,14 +46,25 @@ export default function UsersPage() {
   };
 
   useEffect(() => {
-    fetch('api/users')
-      .then((res) => res.json())
-      .then((data) => setUsers(data))
-      .catch((error) => {
-        console.log('Ошибка получения списка пользователей', error);
-        setUsers([]);
-      });
-  }, []);
+    const checkAuth = async () => {
+      const session = await getSession();
+      if (!session) {
+        router.push('/auth/signin');
+        return;
+      }
+
+      // Загружаем данные только если пользователь авторизован
+      fetch('api/users')
+        .then((res) => res.json())
+        .then((data) => setUsers(data))
+        .catch((error) => {
+          console.log('Ошибка получения списка пользователей', error);
+          setUsers([]);
+        });
+    };
+
+    checkAuth();
+  }, [router]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     setIsSubmitting(true);

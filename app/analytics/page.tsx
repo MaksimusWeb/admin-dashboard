@@ -1,30 +1,41 @@
 'use client';
 import { User } from '../users/page';
 import { useState, useEffect } from 'react';
+import { getSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function AnalyticsPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [rolesCount, setRolesCount] = useState<{ [key: string]: number }>({}); // доступ по индексу
+  const router = useRouter();
 
   useEffect(() => {
-    try {
-      fetch('/api/users')
-        .then((res) => res.json())
-        .then((data) => {
-          setUsers(data);
-          const stats: { [key: string]: number } = {};
-          data.forEach((user: User) => {
-            stats[user.role] = (stats[user.role] || 0) + 1; // если роли не будет то получится новый ключ undefined со
-            // значением +1 и так далее, но на в этом проекте на практике такого не будет потому что у нас всегда есть роль
-          });
-          setRolesCount(stats);
+    const checkAuth = async () => {
+      const session = await getSession();
+      if (!session) {
+        router.push('/auth/signin');
+        return;
+      }
+
+      // Загружаем данные только если пользователь авторизован
+      try {
+        const res = await fetch('/api/users');
+        const data = await res.json();
+        setUsers(data);
+        const stats: { [key: string]: number } = {};
+        data.forEach((user: User) => {
+          stats[user.role] = (stats[user.role] || 0) + 1;
         });
-    } catch (error) {
-      console.log('Ошибка получения данных для аналитики', error);
-      setUsers([]);
-      setRolesCount({});
-    }
-  }, []);
+        setRolesCount(stats);
+      } catch (error) {
+        console.log('Ошибка получения данных для аналитики', error);
+        setUsers([]);
+        setRolesCount({});
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const getRoleDisplayName = (role: string): string => {
     switch (role) {
